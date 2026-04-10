@@ -7,128 +7,127 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 
-// ===========================================
-// 2. CLASS COMPONENT (Stateful & Lifecycle)
-// Bertugas mengelola memori dan logika
-// ===========================================
 export default function App() {
-  // A. INISIALISASI STATE
-  //1. GANTI this.state jadi useState
-  const [kodeKelas, setKodeKelas] = useState('');
+  // STATE
+  const [kodeKelas, setKodeKelas] = useState("");
   const [isHadir, setIsHadir] = useState(false);
-  const [waktuAbsen, setWaktuAbsen] = useState('');
-  const [jamRealtime, setJamRealtime] = useState('Mmeuat jam...');
+  const [waktuAbsen, setWaktuAbsen] = useState("");
+  const [jamRealtime, setJamRealtime] = useState("Memuat jam...");
 
   const studentData = {
-    nama: 'Khairunnisa Aliya Fazila',
-    nim: '0920240010',
-    prodi: 'TRPL - Politeknik Astra',
+    nama: "Khairunnisa Aliya Fazila",
+    nim: "0920240010",
+    prodi: "TRPL - Politeknik Astra",
   };
 
-  // B. FASE MOUNTING (Komponen Lahir)
-  //2. gabungin mounting unmounting
+  // MOUNTING + UNMOUNTING
   useEffect(() => {
-    console.log('[MOUNTING] Aplikasi dibuka (via useeffect). Jam menyala.');
+    console.log("[MOUNTING] Aplikasi dibuka. Jam menyala.");
 
-    //timer jalan tiap detik
-    const intervalJam = setInterval(() =>{
-      const waktu = new Date().toLocaleTimeString( 'id-ID', {
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
+    const intervalJam = setInterval(() => {
+      const waktu = new Date().toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
       });
-      setJamRealtime(waktu); //gantiin this.state
+      setJamRealtime(waktu);
     }, 1000);
 
-    return() => {
-      console.log('[UNMOUNTING] Aplikasi ditutup. Mmebersihkan innterval jam!');
+    return () => {
+      console.log("[UNMOUNTING] Membersihkan interval jam!");
       clearInterval(intervalJam);
     };
   }, []);
 
-  useEffect( () => {
-    if (isHadir === true) {
+  // UPDATE
+  useEffect(() => {
+    if (isHadir) {
       console.log(`[UPDATING] Sukses presensi pada pukul: ${waktuAbsen}`);
-
     }
   }, [isHadir, waktuAbsen]);
 
-  // 4. EVENT HANDLER (Tanpa 'this')
+  // EVENT
   const handleAbsen = () => {
-    if (kodeKelas.trim() === '') {
-      alert('Masukkan kode kelas terlebih dahulu!');
+    if (kodeKelas.trim() === "") {
+      alert("Masukkan kode kelas terlebih dahulu!");
       return;
     }
 
-    //Ubah state secara langsung dnegan fungsi setter nya
     setIsHadir(true);
     setWaktuAbsen(jamRealtime);
   };
+
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        {/* HEADER */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Sistem Presensi</Text>
+          <Text style={styles.clockText}>{jamRealtime}</Text>
+        </View>
+
+        {/* PROFIL */}
+        <KartuProfil student={studentData} />
+
+        {/* PRESENSI */}
+        <View style={styles.actionSection}>
+          {isHadir ? (
+            <View style={styles.successCard}>
+              <Image
+                source={{
+                  uri: "https://cdn-icons-png.flaticon.com/512/190/190411.png",
+                }}
+                style={styles.successIcon}
+              />
+              <Text style={styles.successText}>Presensi Berhasil!</Text>
+              <Text style={styles.timeText}>
+                Tercatat pada: {waktuAbsen} WIB
+              </Text>
+              <Text style={styles.codeText}>
+                Kode Terverifikasi: {kodeKelas}
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.inputCard}>
+              <Text style={styles.instructionText}>Masukkan Kode Kelas:</Text>
+              <Text style={styles.noteText}>
+                (Simulasi dari hasil Scan QR Kamera)
+              </Text>
+
+              <TextInput
+                style={styles.input}
+                placeholder="Contoh: TRPL-03"
+                value={kodeKelas}
+                onChangeText={setKodeKelas}
+                autoCapitalize="characters"
+              />
+
+              <TouchableOpacity
+                style={styles.buttonSubmit}
+                onPress={handleAbsen}
+              >
+                <Text style={styles.buttonText}>Konfirmasi Kehadiran</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
+  );
 }
 
-  const KartuProfil = ({ student }) => {
-
-    return (
-      <SafeAreaProvider>
-        <SafeAreaView style={styles.container}>
-          {/* HEADER DENGAN JAM DIGITAL (Terhubung ke State) */}
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>Sistem Presensi</Text>
-            <Text style={styles.clockText}>{jamRealtime}</Text>
-          </View>
-
-          {/* MEMANGGIL FUNCTIONAL COMPONENT DAN MENGIRIM PROPS */}
-          <KartuProfil student={studentData} />
-
-          {/* SEKSI PRESENSI (CONDITIONAL RENDERING) */}
-          <View style={styles.actionSection}>
-            {isHadir ? (
-              <View style={styles.successCard}>
-                <Image
-                  source={{
-                    uri: "https://cdn-icons-png.flaticon.com/512/190/190411.png",
-                  }}
-                  style={styles.successIcon}
-                />
-                <Text style={styles.successText}>Presensi Berhasil!</Text>
-                <Text style={styles.timeText}>
-                  Tercatat pada: {waktuAbsen} WIB
-                </Text>
-                <Text style={styles.codeText}>
-                  Kode Terverifikasi: {kodeKelas}
-                </Text>
-              </View>
-            ) : (
-
-              <View style={styles.inputCard}>
-                <Text style={styles.instructionText}>Masukkan Kode Kelas:</Text>
-                <Text style={styles.noteText}>
-                  (Simulasi dari hasil Scan QR Kamera)
-                </Text>
-
-                <TextInput
-                  style={styles.input}
-                  placeholder="Contoh: TRPL-03"
-                  value={kodeKelas}
-                  // Hati-hati: Di class, kita gunakan this.setState
-                  onChangeText={setKodeKelas}
-                  autoCapitalize="characters"
-                />
-
-                <TouchableOpacity
-                  style={styles.buttonSubmit}
-                  onPress={handleAbsen}
-                >
-                  <Text style={styles.buttonText}>Konfirmasi Kehadiran</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        </SafeAreaView>
-      </SafeAreaProvider>
-    );
-  }
+// ✅ TAMBAHAN: KOMPONEN PROFIL (yang tadi belum ada)
+const KartuProfil = ({ student }) => {
+  return (
+    <View style={styles.profileCard}>
+      <Text style={styles.profileName}>{student.nama}</Text>
+      <Text style={styles.profileText}>NIM: {student.nim}</Text>
+      <Text style={styles.profileText}>Prodi: {student.prodi}</Text>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -148,11 +147,30 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
   },
-  headerSubtitle: {
+  clockText: {
     color: "#D1E8FF",
-    fontSize: 14,
+    fontSize: 16,
     marginTop: 5,
   },
+
+  profileCard: {
+    backgroundColor: "#fff",
+    marginHorizontal: 20,
+    padding: 15,
+    borderRadius: 10,
+    elevation: 2,
+  },
+  profileName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  profileText: {
+    fontSize: 14,
+    color: "#555",
+    marginTop: 3,
+  },
+
   actionSection: {
     marginTop: 30,
     marginHorizontal: 20,
@@ -197,7 +215,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   successCard: {
-    backgroundColor: "#E8F5E9", // Latar belakang hijau lembut
+    backgroundColor: "#E8F5E9",
     padding: 30,
     borderRadius: 12,
     alignItems: "center",
